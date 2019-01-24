@@ -1,11 +1,10 @@
 package main
 
 import (
-	//	"flag"
+	"flag"
 	"fmt"
-	//	"os"
+	"os"
 	//	"strings"
-
 	"code.cloudfoundry.org/cli/plugin"
 )
 
@@ -20,6 +19,27 @@ func main() {
 
 func (stackAuditor *StackAudit) Run(cliConnection plugin.CliConnection, args []string) {
 	fmt.Printf("hello\n")
+
+	stackAuditFlagSet := flag.NewFlagSet("stackaudit", flag.ExitOnError)
+	org := stackAuditFlagSet.String("org", "", "set org to audit on")
+	space := stackAuditFlagSet.String("space", "", "set space to audit on (requires -org)")
+
+	err := stackAuditFlagSet.Parse(args[1:])
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	if *org == "" && *space != "" {
+		fmt.Printf("Please set -org when using -space\n")
+		os.Exit(1)
+	}
+
+	//Get list of orgs filtering by org flag
+	//Get list of from each org flitering by org/space flag
+	//Get list of apps in each org & space with name and stack details
+	//display list of apps (Org,Space, app, count of stack X, count of stack y, count of stack z) some sort of transposition needs to occur
+
 }
 
 func (stackAuditor *StackAudit) GetMetadata() plugin.PluginMetadata {
