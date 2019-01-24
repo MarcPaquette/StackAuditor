@@ -1,2 +1,2 @@
-# StackAuditor
-cf plugin to audit stacks
+# StackInventory
+cf plugin to inventory stacks
