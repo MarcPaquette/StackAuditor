@@ -49,11 +49,10 @@ func (stackAuditor *StackAudit) Run(cliConnection plugin.CliConnection, args []s
 	}
 
 	cfconfig := &cfclient.Config{
-		ApiAddress: apiEndpoint,
-		Token:      cfToken,
+		ApiAddress:        apiEndpoint,
+		Token:             cfToken,
+		SkipSslValidation: true, //TODO: make this configurable
 	}
-
-	fmt.Println(apiEndpoint, cfToken)
 
 	client, err := cfclient.NewClient(cfconfig)
 	if err != nil {
