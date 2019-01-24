@@ -6,6 +6,7 @@ import (
 	"os"
 	//	"strings"
 	"code.cloudfoundry.org/cli/plugin"
+	cfclient "github.com/cloudfoundry-community/go-cfclient"
 )
 
 type StackAudit struct {
@@ -18,8 +19,7 @@ func main() {
 }
 
 func (stackAuditor *StackAudit) Run(cliConnection plugin.CliConnection, args []string) {
-	fmt.Printf("hello\n")
-
+	//define and Parse args
 	stackAuditFlagSet := flag.NewFlagSet("stackaudit", flag.ExitOnError)
 	org := stackAuditFlagSet.String("org", "", "set org to audit on")
 	space := stackAuditFlagSet.String("space", "", "set space to audit on (requires -org)")
@@ -35,10 +35,45 @@ func (stackAuditor *StackAudit) Run(cliConnection plugin.CliConnection, args []s
 		os.Exit(1)
 	}
 
-	//Get list of orgs filtering by org flag
-	//Get list of from each org flitering by org/space flag
+	//Establish connection to capi
+	apiEndpoint, err := cliConnection.ApiEndpoint()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	cfToken, err := cliConnection.AccessToken()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	cfconfig := &cfclient.Config{
+		ApiAddress: apiEndpoint,
+		Token:      cfToken,
+	}
+
+	fmt.Println(apiEndpoint, cfToken)
+
+	client, err := cfclient.NewClient(cfconfig)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	apps, err := client.ListApps()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	fmt.Println(apps)
+
+	//Get GUID list of orgs filtering by org flag
+	//Get GUID list of space from each org flitering by org/space flag
+	//get GUID list of stacks
 	//Get list of apps in each org & space with name and stack details
-	//display list of apps (Org,Space, app, count of stack X, count of stack y, count of stack z) some sort of transposition needs to occur
+	//display list of apps (Org,Space, app, count of stack X, count of stack y, count of stack z) in tabular format
 
 }
 
