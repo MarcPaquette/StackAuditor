@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
 	//	"strings"
 	"code.cloudfoundry.org/cli/plugin"
 	cfclient "github.com/cloudfoundry-community/go-cfclient"
@@ -26,44 +25,48 @@ func (stackInventory *StackInventory) Run(cliConnection plugin.CliConnection, ar
 
 	err := stackInventoryFlagSet.Parse(args[1:])
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		panic(err)
 	}
 
 	if *org == "" && *space != "" {
 		fmt.Printf("Please set -org when using -space\n")
-		os.Exit(1)
 	}
 
 	//Establish connection to capi
 	apiEndpoint, err := cliConnection.ApiEndpoint()
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		panic(err)
 	}
 
-	cfToken, err := cliConnection.AccessToken()
+	token, err := cliConnection.AccessToken()
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		panic(err)
+	}
+
+	cfToken := token[7:len(token)]
+
+	cfUser, err := cliConnection.Username()
+	if err != nil {
+		panic(err)
 	}
 
 	cfconfig := &cfclient.Config{
 		ApiAddress:        apiEndpoint,
+		Username:          cfUser,
 		Token:             cfToken,
 		SkipSslValidation: true, //TODO: make this configurable
+		ClientSecret:      "",
+		ClientID:          "cf",
 	}
 
 	client, err := cfclient.NewClient(cfconfig)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		panic(err)
 	}
 
-	apps, err := client.ListApps()
+	apps, err := client.ListApps() //Error requesting apps: cfclient: error (1000): CF-InvalidAuthToken
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		panic(err)
 	}
 
 	fmt.Println(apps)
