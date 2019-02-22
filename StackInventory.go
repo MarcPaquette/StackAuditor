@@ -1,6 +1,5 @@
 package main
 
-//Hi Chu
 import (
 	"flag"
 	"fmt"
